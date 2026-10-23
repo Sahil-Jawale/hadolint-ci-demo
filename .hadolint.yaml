@@ -1,0 +1,20 @@
+# Hadolint configuration (picked up automatically from the repo root).
+
+# Fail only on warnings and errors; "info" and "style" findings are reported
+# but do not break the build. Levels: error | warning | info | style | ignore
+failure-threshold: warning
+
+# Rules to skip entirely. Example: uncomment to stop requiring pinned apt
+# package versions (DL3008) if exact pins keep breaking your builds.
+ignored: []
+#  - DL3008
+
+# Only allow base images from these registries (DL3026).
+trustedRegistries:
+  - docker.io
+
+# Raise or lower the severity of individual rules.
+override:
+  error:
+    - DL3002   # last USER should not be root -> treat as a hard error
+    - DL3007   # using :latest -> treat as a hard error

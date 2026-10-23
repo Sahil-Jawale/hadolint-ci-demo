@@ -1,0 +1,34 @@
+name: Dockerfile Lint
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  hadolint:
+    name: Lint Dockerfile with Hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          config: .hadolint.yaml
+          # The action sets its own default (info), which would override the
+          # config file, so set the threshold here explicitly as well.
+          failure-threshold: warning
+
+  build:
+    name: Build image (only if lint passes)
+    needs: hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t hadolint-demo:${{ github.sha }} .
