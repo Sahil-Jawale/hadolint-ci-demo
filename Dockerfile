@@ -1,28 +1,14 @@
-# Final, Hadolint-clean Dockerfile.
-FROM python:3.12.7-slim-bookworm
+# Deliberately BAD Dockerfile - every line below breaks a best practice.
+FROM python:latest
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+RUN apt-get update
+RUN apt-get install curl
 
-# Single layer, no extra packages, pinned version, apt cache removed.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl=7.88.1-10+deb12u15 \
-    && rm -rf /var/lib/apt/lists/*
-
+ADD . /app
 WORKDIR /app
 
-# Install dependencies first so this layer is cached between code changes.
-COPY app/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r app/requirements.txt
 
-COPY app/ .
-
-# Run as an unprivileged user instead of root.
-RUN useradd --create-home --uid 10001 appuser
-USER appuser
-
+USER root
 EXPOSE 5000
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -fsS http://localhost:5000/health || exit 1
-
-# Exec form so the process receives signals (SIGTERM) directly.
-CMD ["python", "app.py"]
+CMD python app/app.py
